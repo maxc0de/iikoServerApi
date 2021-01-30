@@ -10,13 +10,13 @@ namespace iikoAPIServer
 
         public string Address { get; private set; }
 
-        public string Port { get; private set; }
+        public int Port { get; private set; }
 
         public string Url
         {
             get
             {
-                if (Port == "443")
+                if (Port == 443)
                 {
                     return $"https://{Address}/resto";
                 }
@@ -27,7 +27,7 @@ namespace iikoAPIServer
             }
         }
 
-        public IikoServer(string login, string password, string address, string port)
+        public IikoServer(string login, string password, string address, int port)
         {
             Login = login;
             Password = password;

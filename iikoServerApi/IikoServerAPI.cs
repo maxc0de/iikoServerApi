@@ -22,35 +22,54 @@ namespace iikoAPIServer
             _httpClient.Timeout = TimeSpan.FromMinutes(5);
         }
 
-        private async Task LogIn()
+        public async Task<string> RequestMethod(Uri uri)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/auth?login={_iikoServer.Login}&pass={GetHash(_iikoServer.Password)}");
-                _key = await response.Content.ReadAsStringAsync();
-                response.EnsureSuccessStatusCode();
-                _logger.Trace($"Connection received: {_key}");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, _key);
-                throw ex;
-            }
-        }
+            await LogIn();
 
-        private async Task LogOut()
-        {
+            string response;
             try
             {
-                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/logout?key={_key}");
-                response.EnsureSuccessStatusCode();
-                _logger.Trace($"Connection released: {_key}");
+                var httpResponseMsg = await _httpClient.GetAsync(uri);
+                httpResponseMsg.EnsureSuccessStatusCode();
+
+                response = await httpResponseMsg.Content.ReadAsStringAsync();
             }
             catch (Exception ex)
             {
                 _logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                await LogOut();
+            }
+
+            return response;
+        }
+
+        public async Task<string> GetEmployees()
+        {
+            await LogIn();
+
+            string employees;
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/employees?key={_key}");
+                response.EnsureSuccessStatusCode();
+
+                employees = await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+                throw ex;
+            }
+            finally
+            {
+                await LogOut();
+            }
+
+            return employees;
         }
 
         public async Task<string> GetOlapReport(ReportRequest reportRequest)
@@ -136,6 +155,38 @@ namespace iikoAPIServer
             }
 
             return departments;
+        }
+
+
+        private async Task LogIn()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/auth?login={_iikoServer.Login}&pass={GetHash(_iikoServer.Password)}");
+                _key = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
+                _logger.Trace($"Connection received: {_key}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, _key);
+                throw ex;
+            }
+        }
+
+        private async Task LogOut()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/logout?key={_key}");
+                response.EnsureSuccessStatusCode();
+                _logger.Trace($"Connection released: {_key}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+                throw ex;
+            }
         }
 
         private static string GetHash(string value)
