@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
+using iikoAPIServer.Helpers;
 
 namespace iikoAPIServer
 {
@@ -16,61 +17,24 @@ namespace iikoAPIServer
 
         private static string _key;
 
+
         public IikoServerAPI(IikoServer iikoServer)
         {
             _iikoServer = iikoServer;
             _httpClient.Timeout = TimeSpan.FromMinutes(5);
         }
 
-        public async Task<string> RequestMethod(Uri uri)
+
+        public async Task<Employee[]> GetEmployees()
         {
-            await LogIn();
+            string s = await RequestMethod($"{_iikoServer.Url}/api/employees" + "?key={0}");
 
-            string response;
-            try
-            {
-                var httpResponseMsg = await _httpClient.GetAsync(uri);
-                httpResponseMsg.EnsureSuccessStatusCode();
+            var obj = XmlStorageHelper.ReadFromXmlString<Employees>(s);
 
-                response = await httpResponseMsg.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex);
-                throw ex;
-            }
-            finally
-            {
-                await LogOut();
-            }
-
-            return response;
+            return obj.EmployeeList;
         }
 
-        public async Task<string> GetEmployees()
-        {
-            await LogIn();
 
-            string employees;
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/employees?key={_key}");
-                response.EnsureSuccessStatusCode();
-
-                employees = await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex);
-                throw ex;
-            }
-            finally
-            {
-                await LogOut();
-            }
-
-            return employees;
-        }
 
         public async Task<string> GetOlapReport(ReportRequest reportRequest)
         {
@@ -158,6 +122,31 @@ namespace iikoAPIServer
         }
 
 
+        private async Task<string> RequestMethod(string uri)
+        {
+            await LogIn();
+
+            string response;
+            try
+            {
+                var httpResponseMsg = await _httpClient.GetAsync(string.Format(uri, _key));
+                httpResponseMsg.EnsureSuccessStatusCode();
+
+                response = await httpResponseMsg.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+                throw ex;
+            }
+            finally
+            {
+                await LogOut();
+            }
+
+            return response;
+        }
+
         private async Task LogIn()
         {
             try
@@ -170,21 +159,6 @@ namespace iikoAPIServer
             catch (Exception ex)
             {
                 _logger.Error(ex, _key);
-                throw ex;
-            }
-        }
-
-        private async Task LogOut()
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/logout?key={_key}");
-                response.EnsureSuccessStatusCode();
-                _logger.Trace($"Connection released: {_key}");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex);
                 throw ex;
             }
         }
@@ -202,6 +176,21 @@ namespace iikoAPIServer
                 }
 
                 return sb.ToString();
+            }
+        }
+
+        private async Task LogOut()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/logout?key={_key}");
+                response.EnsureSuccessStatusCode();
+                _logger.Trace($"Connection released: {_key}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+                throw ex;
             }
         }
     }

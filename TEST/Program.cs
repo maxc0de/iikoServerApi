@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using iikoAPIServer;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace TEST
 {
@@ -13,9 +15,12 @@ namespace TEST
         {
             IikoServerAPI iikoAPI = new IikoServerAPI(new IikoServer("admin", "Zx08365#", "176.118.219.130", 18281));
 
+            var emp = iikoAPI.GetEmployees().Result;
 
 
-            string emp = iikoAPI.GetEmployees().Result;
+
+
+
 
         }
     }

@@ -52,6 +52,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Employees.cs" />
+    <Compile Include="Employee.cs" />
     <Compile Include="NewFolder1\CorporateItemDto.cs" />
     <Compile Include="NewFolder1\CorporateItemDtoes.cs" />
     <Compile Include="IikoServer.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Reports\ReportRequest.cs" />
     <Compile Include="Filters\ValueFilter.cs" />
     <Compile Include="Reports\ReportManager.cs" />
+    <Compile Include="XmlStorageHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">
