@@ -15,7 +15,8 @@ namespace TEST
         {
             IikoServerAPI iikoAPI = new IikoServerAPI(new IikoServer("admin", "Zx08365#", "176.118.219.130", 18281));
 
-            var emp = iikoAPI.GetEmployees().Result;
+
+            var cashShifts = iikoAPI.GetCashShifts(new DateTime(2019, 09, 01), DateTime.Now, CashShiftStatus.OPEN).Result;
 
 
 

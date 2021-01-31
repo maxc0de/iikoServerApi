@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace iikoAPIServer.Helpers
 {
-  public static class XmlStorageHelper
+  public static class XmlHelper
   {
     public static void WriteToXmlFile<T>(string filePath, T objectToWrite, bool append = false) where T : new()
     {

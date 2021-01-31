@@ -3,6 +3,7 @@ using System.Text;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Linq;
 using Newtonsoft.Json;
 using NLog;
 using iikoAPIServer.Helpers;
@@ -27,14 +28,34 @@ namespace iikoAPIServer
 
         public async Task<Employee[]> GetEmployees()
         {
-            string s = await RequestMethod($"{_iikoServer.Url}/api/employees" + "?key={0}");
+            string employeesXml = await RequestMethod($"{_iikoServer.Url}/api/employees?key={{0}}");
 
-            var obj = XmlStorageHelper.ReadFromXmlString<Employees>(s);
-
-            return obj.EmployeeList;
+            return XmlHelper.ReadFromXmlString<Employees>(employeesXml).EmployeeList;
         }
 
+        public async Task<CorporateItemDto[]> GetDepartments()
+        {
+            string departmentsXml = await RequestMethod($"{_iikoServer.Url}/api/corporation/departments?key={{0}}");
 
+            return XmlHelper.ReadFromXmlString<CorporateItemDtoes>(departmentsXml).CorporateItemDtoList;
+        }
+
+        public async Task<TerminalDto[]> GetTerminals(bool onlyFronts = true)
+        {
+            string terminalsXml = await RequestMethod($"{_iikoServer.Url}/api/corporation/terminals?key={{0}}");
+
+            return XmlHelper.ReadFromXmlString<TerminalDtoes>(terminalsXml).TerminalDtoList.Where(x => !onlyFronts || !x.Anonymous).ToArray();
+        }
+
+        public async Task<CashShift[]> GetCashShifts(DateTime openDateFrom, DateTime openDateTo, CashShiftStatus status)
+        {
+            string From = openDateFrom.ToString("yyyy-MM-dd");
+            string To = openDateTo.ToString("yyyy-MM-dd");
+
+            string cashShiftsJson = await RequestMethod($"{_iikoServer.Url}/api/v2/cashshifts/list?key={{0}}&openDateFrom={From}&openDateTo={To}&status={status}");
+
+            return JsonConvert.DeserializeObject<CashShift[]>(cashShiftsJson);
+        }
 
         public async Task<string> GetOlapReport(ReportRequest reportRequest)
         {
@@ -93,32 +114,6 @@ namespace iikoAPIServer
             }
 
             return columns;
-        }
-
-        public async Task<string> GetDepartments()
-        {
-            await LogIn();
-
-            string departments = null;
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_iikoServer.Url}/api/corporation/departments?key={_key}&reportType=SALES");
-                departments = await response.Content.ReadAsStringAsync();
-
-                response.EnsureSuccessStatusCode();
-                _logger.Info("Departments received");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, departments);
-                throw ex;
-            }
-            finally
-            {
-                await LogOut();
-            }
-
-            return departments;
         }
 
 

@@ -9,6 +9,6 @@ namespace iikoAPIServer
     public class CorporateItemDtoes
     {
         [XmlElement("corporateItemDto")]
-        public List<CorporateItemDto> CorporateItemDtos { get; set; } = new List<CorporateItemDto>();
+        public CorporateItemDto[] CorporateItemDtoList { get; set; }
     }
 }
