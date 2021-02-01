@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     public class OlapReport<T>
     {

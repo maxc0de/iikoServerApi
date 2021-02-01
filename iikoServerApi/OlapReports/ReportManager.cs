@@ -2,7 +2,7 @@
 using System.Data;
 using System.Threading.Tasks;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     public static class ReportManager
     {

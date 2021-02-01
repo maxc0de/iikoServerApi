@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     [DataContract]
     public class ReportModel

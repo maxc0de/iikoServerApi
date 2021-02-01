@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     [Serializable]
     [XmlRoot("employee")]

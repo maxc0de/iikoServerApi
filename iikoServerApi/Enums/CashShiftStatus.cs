@@ -1,4 +1,4 @@
-﻿namespace iikoAPIServer
+﻿namespace IikoServerApi
 {
     public enum CashShiftStatus
     {

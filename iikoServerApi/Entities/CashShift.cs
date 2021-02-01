@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     public class CashShift
     {

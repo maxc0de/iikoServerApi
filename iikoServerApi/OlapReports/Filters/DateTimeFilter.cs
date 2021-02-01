@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     public class DateTimeFilter
     {

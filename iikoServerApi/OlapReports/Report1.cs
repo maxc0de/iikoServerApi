@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     public class Report1
     {
@@ -33,7 +33,7 @@ namespace iikoAPIServer
 
         public static async Task<DataTable> Create(RequestModel model)
         {
-            IikoServerAPI apiServer = new IikoServerAPI(model.IikoServer);
+            IikoServerApi apiServer = new IikoServerApi(model.IikoServer);
 
             var reportRequest = GetReportRequest(model.From, model.To, model.Departments);
             var json = await apiServer.GetOlapReport(reportRequest);

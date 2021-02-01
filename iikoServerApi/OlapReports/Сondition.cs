@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     [DataContract]
     public class Сondition

@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace iikoAPIServer
+namespace IikoServerApi
 {
     public class RequestModel
     {
-        public IikoServer IikoServer { get; set; }
+        public IikoRMS IikoServer { get; set; }
 
         public DateTime From { get; set; }
 
@@ -14,7 +14,7 @@ namespace iikoAPIServer
 
         public string[] Departments { get; set; }
 
-        public RequestModel(IikoServer iikoServer, DateTime from, DateTime to, ReportModel reportModel, params string[] departments)
+        public RequestModel(IikoRMS iikoServer, DateTime from, DateTime to, ReportModel reportModel, params string[] departments)
         {
             IikoServer = iikoServer;
             From = from;
