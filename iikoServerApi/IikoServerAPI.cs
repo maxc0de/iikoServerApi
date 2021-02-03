@@ -10,10 +10,12 @@ using Newtonsoft.Json;
 
 namespace IikoServerApi
 {
-    public class IikoServerApi
+    public class IikoServerApi : IDisposable
     {
         private readonly IikoRMS _iikoRMS;
         private readonly HttpClient _httpClient;
+
+        private string _key;
 
 
         public IikoServerApi(IikoRMS iikoServer)
@@ -23,7 +25,7 @@ namespace IikoServerApi
         }
 
 
-        public async Task<Employee[]> GetEmployees()
+        public async Task<Employee[]> GetEmployeesAsync()
         {
             string employeesXml = await ApiRequestAsync($"/resto/api/employees?key={{0}}");
 
@@ -80,7 +82,7 @@ namespace IikoServerApi
             }
             finally
             {
-                await LogOutAsync("");
+                //await LogOutAsync("");
             }
 
             return olapReport;
@@ -104,7 +106,7 @@ namespace IikoServerApi
             }
             finally
             {
-                await LogOutAsync("");
+                //await LogOutAsync("");
             }
 
             return columns;
@@ -113,27 +115,20 @@ namespace IikoServerApi
 
         private async Task<string> ApiRequestAsync(string uri)
         {
-            string key = await LogInAsync();
-
-            string response;
-            try
+            if (string.IsNullOrEmpty(_key))
             {
-                var httpResponseMsg = await _httpClient.GetAsync(string.Format(uri, key));
-                httpResponseMsg.EnsureSuccessStatusCode();
-
-                response = await httpResponseMsg.Content.ReadAsStringAsync();
-            }
-            finally
-            {
-                await LogOutAsync(key);
+                _key = await LogInAsync();
             }
 
-            return response;
+            var httpResponseMsg = await _httpClient.GetAsync(string.Format(uri, _key));
+            httpResponseMsg.EnsureSuccessStatusCode();
+
+            return await httpResponseMsg.Content.ReadAsStringAsync();
         }
 
         private async Task<string> LogInAsync()
         {
-            var response = await _httpClient.GetAsync($"/api/auth?login={_iikoRMS.Login}&pass={GetHash(_iikoRMS.Password)}");
+            var response = await _httpClient.GetAsync($"/resto/api/auth?login={_iikoRMS.Login}&pass={GetHash(_iikoRMS.Password)}");
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
@@ -155,9 +150,9 @@ namespace IikoServerApi
             }
         }
 
-        private async Task LogOutAsync(string key)
+        private async Task LogOutAsync()
         {
-            var response = await _httpClient.GetAsync($"/api/logout?key={key}");
+            var response = await _httpClient.GetAsync($"/resto/api/logout?key={_key}");
             response.EnsureSuccessStatusCode();
         }
 
@@ -172,6 +167,11 @@ namespace IikoServerApi
             }
 
             return obj;
+        }
+
+        public void Dispose()
+        {
+            LogOutAsync().Wait();
         }
     }
 }
