@@ -52,6 +52,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\CashShift.cs" />
+    <Compile Include="Entities\Documents\Document.cs" />
+    <Compile Include="Entities\Documents\DocumentValidationResult.cs" />
+    <Compile Include="Entities\Documents\IncomingInvoiceDtoes.cs" />
+    <Compile Include="Entities\Documents\Item.cs" />
+    <Compile Include="Entities\Documents\Items.cs" />
+    <Compile Include="Entities\Suppliers\Suppliers.cs" />
+    <Compile Include="Entities\Suppliers\Supplier.cs" />
     <Compile Include="Enums\CashShiftStatus.cs" />
     <Compile Include="Entities\TerminalDtoes.cs" />
     <Compile Include="Entities\Employees.cs" />
@@ -75,6 +82,7 @@
     <Compile Include="OlapReports\Filters\ValueFilter.cs" />
     <Compile Include="OlapReports\ReportManager.cs" />
     <Compile Include="Entities\TerminalDto.cs" />
+    <Compile Include="Utf8StringWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

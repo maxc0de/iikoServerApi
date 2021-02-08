@@ -7,15 +7,15 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using IikoServerApi.Entities.Documents;
+using IikoServerApi.Entities.Suppliers;
 
 namespace IikoServerApi
 {
-    public class IikoServerApi : IDisposable
+    public class IikoServerApi
     {
         private readonly IikoRMS _iikoRMS;
         private readonly HttpClient _httpClient;
-
-        private string _key;
 
 
         public IikoServerApi(IikoRMS iikoServer)
@@ -32,18 +32,35 @@ namespace IikoServerApi
             return ReadFromXmlString<Employees>(employeesXml).EmployeeList;
         }
 
+        public async Task<Supplier[]> GetSuppliersAsync()
+        {
+            string suppliersXml = await ApiRequestAsync($"/resto/api/suppliers?key={{0}}");
+
+            return ReadFromXmlString<Suppliers>(suppliersXml).SupplierList;
+        }
+
         public async Task<CorporateItemDto[]> GetDepartments()
         {
-            string departmentsXml = await ApiRequestAsync($"/api/corporation/departments?key={{0}}");
+            string departmentsXml = await ApiRequestAsync($"/resto/api/corporation/departments?key={{0}}");
 
             return ReadFromXmlString<CorporateItemDtoes>(departmentsXml).CorporateItemDtoList;
         }
 
         public async Task<TerminalDto[]> GetTerminals(bool onlyFronts = true)
         {
-            string terminalsXml = await ApiRequestAsync($"/api/corporation/terminals?key={{0}}");
+            string terminalsXml = await ApiRequestAsync($"/resto/api/corporation/terminals?key={{0}}");
 
             return ReadFromXmlString<TerminalDtoes>(terminalsXml).TerminalDtoList.Where(x => !onlyFronts || !x.Anonymous).ToArray();
+        }
+
+        public async Task<Document[]> GetIncomingInvoice(DateTime from, DateTime to, Guid? supplierId = null)
+        {
+            string From = from.ToString("yyyy-MM-dd");
+            string To = to.ToString("yyyy-MM-dd");
+
+            string terminalsXml = await ApiRequestAsync($"/resto/api/documents/export/incomingInvoice?key={{0}}&from={From}&to={To}&supplierId={supplierId}");
+
+            return ReadFromXmlString<IncomingInvoiceDtoes>(terminalsXml).DocumentList;
         }
 
         public async Task<CashShift[]> GetCashShifts(DateTime openDateFrom, DateTime openDateTo, CashShiftStatus status)
@@ -51,9 +68,23 @@ namespace IikoServerApi
             string From = openDateFrom.ToString("yyyy-MM-dd");
             string To = openDateTo.ToString("yyyy-MM-dd");
 
-            string cashShiftsJson = await ApiRequestAsync($"/api/v2/cashshifts/list?key={{0}}&openDateFrom={From}&openDateTo={To}&status={status}");
+            string cashShiftsJson = await ApiRequestAsync($"/resto/api/v2/cashshifts/list?key={{0}}&openDateFrom={From}&openDateTo={To}&status={status}");
 
             return JsonConvert.DeserializeObject<CashShift[]>(cashShiftsJson);
+        }
+
+        public async Task<DocumentValidationResult> AddIncomingInvoiceAsync(Document document)
+        {
+            //var json = JsonConvert.SerializeObject(document);
+
+
+            string s = WriteFromXmlString(document);
+            var data = new StringContent(s, Encoding.UTF8, "application/xml"); //
+
+
+            string documentValidationResult = await ApiRequestAsync($"/resto/api/documents/import/incomingInvoice?key={{0}}", HttpMethod.Post, data);
+
+            return JsonConvert.DeserializeObject<DocumentValidationResult>(documentValidationResult);
         }
 
         public async Task<string> GetOlapReport(ReportRequest reportRequest)
@@ -113,15 +144,32 @@ namespace IikoServerApi
         }
 
 
-        private async Task<string> ApiRequestAsync(string uri)
+        private async Task<string> ApiRequestAsync(string uri, HttpMethod httpMethod = null, StringContent content = null)
         {
-            if (string.IsNullOrEmpty(_key))
-            {
-                _key = await LogInAsync();
-            }
+            string key = await LogInAsync();
 
-            var httpResponseMsg = await _httpClient.GetAsync(string.Format(uri, _key));
-            httpResponseMsg.EnsureSuccessStatusCode();
+            HttpResponseMessage httpResponseMsg = null;
+            try
+            {
+                if (httpMethod == HttpMethod.Get || httpMethod == null)
+                {
+                    httpResponseMsg = await _httpClient.GetAsync(string.Format(uri, key));
+                }
+                else if (httpMethod == HttpMethod.Post)
+                {
+                    httpResponseMsg = await _httpClient.PostAsync(string.Format(uri, key), content);
+                }
+
+                httpResponseMsg.EnsureSuccessStatusCode();
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                LogOutAsync(key).Wait();
+            }
 
             return await httpResponseMsg.Content.ReadAsStringAsync();
         }
@@ -150,28 +198,38 @@ namespace IikoServerApi
             }
         }
 
-        private async Task LogOutAsync()
+        private async Task LogOutAsync(string key)
         {
-            var response = await _httpClient.GetAsync($"/resto/api/logout?key={_key}");
+            var response = await _httpClient.GetAsync($"/resto/api/logout?key={key}");
             response.EnsureSuccessStatusCode();
         }
 
-        private static T ReadFromXmlString<T>(string value) where T : new()
+        private T ReadFromXmlString<T>(string value) where T : new()
         {
             XmlSerializer formatter = new XmlSerializer(typeof(T));
 
             T obj;
+
             using (Stream fs = new MemoryStream(Encoding.UTF8.GetBytes(value)))
             {
                 obj = (T)formatter.Deserialize(fs);
             }
 
+
             return obj;
         }
 
-        public void Dispose()
+        private string WriteFromXmlString<T>(T value) where T : new()
         {
-            LogOutAsync().Wait();
+            XmlSerializer formatter = new XmlSerializer(typeof(T));
+
+            StringWriter writer;
+            using (writer = new Utf8StringWriter())
+            {
+                formatter.Serialize(writer, value);
+            }
+
+            return writer.ToString();
         }
     }
 }
