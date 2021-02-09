@@ -12,7 +12,7 @@ namespace IikoServerApi_Tests
         [Test]
         public async Task Test1()
         {
-            IikoApi.IikoServerApi iikoServerApi = new IikoApi.IikoServerApi(_rms);
+            IikoServerApi iikoServerApi = new IikoServerApi(_rms);
 
             var e = await iikoServerApi.GetEmployeesAsync();
 
