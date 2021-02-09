@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace IikoServerApi
+namespace IikoApi
 {
     public class ReportRequest
     {

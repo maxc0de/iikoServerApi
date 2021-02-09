@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IikoServerApi;
-using IikoServerApi.Entities.Documents;
-using IikoServerApi.Entities.Suppliers;
+using IikoApi;
+using IikoApi.Entities.Suppliers;
 
 namespace ConsoleApp1
 {
@@ -17,21 +13,21 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
 
-            IikoServerApi.IikoServerApi api = new IikoServerApi.IikoServerApi(_rms);
+            IikoServerApi api = new IikoServerApi(_rms);
             
             var sup = api.GetSuppliersAsync().Result;
 
-            Supplier supplier = EntitySelect(sup, "Выберите поставщика:");
+            Supplier supplier = sup[8]; //EntitySelect(sup, "Выберите поставщика:");
 
-            Document document = new Document(supplier.Id);
 
-            var t = api.GetIncomingInvoice(DateTime.Now.AddMonths(-24), DateTime.Now, supplier.Id).Result;
+            var t = api.GetIncomingInvoicesAsync(DateTime.Now.AddMonths(-24), DateTime.Now).Result;
 
 
             var d = t.First();
-            d.DocumentNumber = 3;
+            d.Id = Guid.NewGuid().ToString();
 
-            var r = api.AddIncomingInvoiceAsync(d).Result;
+
+             //var r = api.AddIncomingInvoiceAsync(d).Result;
 
 
 

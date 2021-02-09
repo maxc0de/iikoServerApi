@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using IikoServerApi;
+using IikoApi;
 
 namespace IikoServerApi_Tests
 {
@@ -12,7 +12,7 @@ namespace IikoServerApi_Tests
         [Test]
         public async Task Test1()
         {
-            IikoServerApi.IikoServerApi iikoServerApi = new IikoServerApi.IikoServerApi(_rms);
+            IikoApi.IikoServerApi iikoServerApi = new IikoApi.IikoServerApi(_rms);
 
             var e = await iikoServerApi.GetEmployeesAsync();
 

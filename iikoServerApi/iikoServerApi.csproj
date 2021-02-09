@@ -52,7 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\CashShift.cs" />
-    <Compile Include="Entities\Documents\Document.cs" />
+    <Compile Include="Entities\Documents\IncomingInvoiceExport.cs" />
+    <Compile Include="Entities\Documents\IncomingInvoiceImport.cs" />
     <Compile Include="Entities\Documents\DocumentValidationResult.cs" />
     <Compile Include="Entities\Documents\IncomingInvoiceDtoes.cs" />
     <Compile Include="Entities\Documents\Item.cs" />

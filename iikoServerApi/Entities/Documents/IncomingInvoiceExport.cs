@@ -1,39 +1,42 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace IikoServerApi.Entities.Documents
+namespace IikoApi.Entities.Documents
 {
 	[Serializable]
 	[XmlRoot(ElementName = "document")]
-	public class Document
+	public class IncomingInvoiceExport
 	{
 
 		[XmlElement(ElementName = "id")]
 		public string Id { get; set; }
 
 		[XmlElement(ElementName = "transportInvoiceNumber")]
-		public object TransportInvoiceNumber { get; set; }
+        public string TransportInvoiceNumber { get; set; }
 
-		[XmlElement(ElementName = "incomingDate")]
-		public DateTime IncomingDate { get; set; }
+        [XmlElement(ElementName = "incomingDate")]
+        public DateTime IncomingDate { get; set; }
+
+		//[XmlElement(ElementName = "dateIncoming")]
+		//public DateTime DateIncoming { get; set; }
 
 		[XmlElement(ElementName = "useDefaultDocumentTime")]
-		public bool UseDefaultDocumentTime { get; set; }
+        public bool UseDefaultDocumentTime { get; set; }
 
-		[XmlElement(ElementName = "dueDate")]
-		public DateTime DueDate { get; set; }
+        [XmlElement(ElementName = "dueDate")]
+        public string DueDateString { get; set; }
 
-		[XmlElement(ElementName = "supplier")]
+        [XmlElement(ElementName = "supplier")]
 		public Guid Supplier { get; set; }
 
 		[XmlElement(ElementName = "defaultStore")]
 		public string DefaultStore { get; set; }
 
 		[XmlElement(ElementName = "invoice")]
-		public object Invoice { get; set; }
+		public string Invoice { get; set; }
 
 		[XmlElement(ElementName = "documentNumber")]
-		public int DocumentNumber { get; set; }
+		public string DocumentNumber { get; set; }
 
 		[XmlElement(ElementName = "status")]
 		public string Status { get; set; }
@@ -44,12 +47,12 @@ namespace IikoServerApi.Entities.Documents
 		[XmlElement(ElementName = "items")]
 		public Items Items { get; set; }
 
-		public Document()
+		public IncomingInvoiceExport()
         {
 
         }
 
-		public Document(Guid supplier)
+		public IncomingInvoiceExport(Guid supplier)
         {
 			Items = new Items();
 			Supplier = supplier;

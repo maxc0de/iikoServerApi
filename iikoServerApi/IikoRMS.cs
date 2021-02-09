@@ -1,9 +1,11 @@
 ﻿using System;
 
-namespace IikoServerApi
+namespace IikoApi
 {
     public class IikoRMS
     {
+        private const string defaultLogin = "admin";
+
         public string Address { get; private set; }
 
         public int Port { get; private set; }
@@ -32,11 +34,11 @@ namespace IikoServerApi
         {
             Address = address;
             Port = port;
-            Login = "admin";
+            Login = defaultLogin;
             Password = password;
         }
 
-        public IikoRMS(string login, string password, string address, int port) : this(address, port, password)
+        public IikoRMS(string address, int port, string login, string password) : this(address, port, password)
         {
             Login = login;
         }

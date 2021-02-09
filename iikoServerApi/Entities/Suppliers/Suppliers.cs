@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace IikoServerApi.Entities.Suppliers
+namespace IikoApi.Entities.Suppliers
 {
 	[Serializable]
 	[XmlRoot(ElementName = "employees")]

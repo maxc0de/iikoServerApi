@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace IikoServerApi
+namespace IikoApi
 {
     [Serializable]
     [XmlRoot("corporateItemDtoes")]

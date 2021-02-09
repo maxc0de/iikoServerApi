@@ -7,10 +7,10 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using IikoServerApi.Entities.Documents;
-using IikoServerApi.Entities.Suppliers;
+using IikoApi.Entities.Documents;
+using IikoApi.Entities.Suppliers;
 
-namespace IikoServerApi
+namespace IikoApi
 {
     public class IikoServerApi
     {
@@ -21,7 +21,7 @@ namespace IikoServerApi
         public IikoServerApi(IikoRMS iikoServer)
         {
             _iikoRMS = iikoServer;
-            _httpClient = new HttpClient() { BaseAddress = _iikoRMS.ServerUri, Timeout = TimeSpan.FromMinutes(5) };
+            _httpClient = new HttpClient() { BaseAddress = _iikoRMS.ServerUri, Timeout = TimeSpan.FromSeconds(5) };
         }
 
 
@@ -39,28 +39,34 @@ namespace IikoServerApi
             return ReadFromXmlString<Suppliers>(suppliersXml).SupplierList;
         }
 
-        public async Task<CorporateItemDto[]> GetDepartments()
+        public async Task<CorporateItemDto[]> GetDepartmentsAsync()
         {
             string departmentsXml = await ApiRequestAsync($"/resto/api/corporation/departments?key={{0}}");
 
             return ReadFromXmlString<CorporateItemDtoes>(departmentsXml).CorporateItemDtoList;
         }
 
-        public async Task<TerminalDto[]> GetTerminals(bool onlyFronts = true)
+        public async Task<TerminalDto[]> GetTerminalsAsync(bool onlyFronts = true)
         {
             string terminalsXml = await ApiRequestAsync($"/resto/api/corporation/terminals?key={{0}}");
 
             return ReadFromXmlString<TerminalDtoes>(terminalsXml).TerminalDtoList.Where(x => !onlyFronts || !x.Anonymous).ToArray();
         }
 
-        public async Task<Document[]> GetIncomingInvoice(DateTime from, DateTime to, Guid? supplierId = null)
+        public async Task<IncomingInvoiceExport[]> GetIncomingInvoicesAsync(DateTime from, DateTime to, Guid? supplierId = null)
         {
             string From = from.ToString("yyyy-MM-dd");
             string To = to.ToString("yyyy-MM-dd");
 
-            string terminalsXml = await ApiRequestAsync($"/resto/api/documents/export/incomingInvoice?key={{0}}&from={From}&to={To}&supplierId={supplierId}");
+            string supplier = string.Empty;
+            if(supplierId != null)
+            {
+                supplier = $"&supplierId={supplierId}";
+            }
 
-            return ReadFromXmlString<IncomingInvoiceDtoes>(terminalsXml).DocumentList;
+            string incomingInvoicesXml = await ApiRequestAsync($"/resto/api/documents/export/incomingInvoice?key={{0}}&from={From}&to={To}" + supplier);
+
+            return ReadFromXmlString<IncomingInvoiceDtoes>(incomingInvoicesXml).DocumentList;
         }
 
         public async Task<CashShift[]> GetCashShifts(DateTime openDateFrom, DateTime openDateTo, CashShiftStatus status)
@@ -73,18 +79,13 @@ namespace IikoServerApi
             return JsonConvert.DeserializeObject<CashShift[]>(cashShiftsJson);
         }
 
-        public async Task<DocumentValidationResult> AddIncomingInvoiceAsync(Document document)
+        public async Task<DocumentValidationResult> AddIncomingInvoiceAsync(IncomingInvoiceImport document)
         {
-            //var json = JsonConvert.SerializeObject(document);
+            var content = CreateXmlContent(document);
 
+            string documentValidationResultXml = await ApiRequestAsync($"/resto/api/documents/import/incomingInvoice?key={{0}}", HttpMethod.Post, content);
 
-            string s = WriteFromXmlString(document);
-            var data = new StringContent(s, Encoding.UTF8, "application/xml"); //
-
-
-            string documentValidationResult = await ApiRequestAsync($"/resto/api/documents/import/incomingInvoice?key={{0}}", HttpMethod.Post, data);
-
-            return JsonConvert.DeserializeObject<DocumentValidationResult>(documentValidationResult);
+            return ReadFromXmlString<DocumentValidationResult>(documentValidationResultXml);
         }
 
         public async Task<string> GetOlapReport(ReportRequest reportRequest)
@@ -219,7 +220,7 @@ namespace IikoServerApi
             return obj;
         }
 
-        private string WriteFromXmlString<T>(T value) where T : new()
+        private StringContent CreateXmlContent<T>(T value) where T : new()
         {
             XmlSerializer formatter = new XmlSerializer(typeof(T));
 
@@ -229,7 +230,10 @@ namespace IikoServerApi
                 formatter.Serialize(writer, value);
             }
 
-            return writer.ToString();
+            string s = writer.ToString();
+            var data = new StringContent(s, Encoding.UTF8, "application/xml");
+
+            return data;
         }
     }
 }

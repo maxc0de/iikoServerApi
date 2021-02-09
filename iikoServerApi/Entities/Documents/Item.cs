@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace IikoServerApi.Entities.Documents
+namespace IikoApi.Entities.Documents
 {
 	[Serializable]
 	[XmlRoot(ElementName = "item")]

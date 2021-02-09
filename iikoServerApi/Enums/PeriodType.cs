@@ -1,4 +1,4 @@
-﻿namespace IikoServerApi
+﻿namespace IikoApi
 {
     public enum PeriodType
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace IikoServerApi
+namespace IikoApi
 {
     public class Report2
     {

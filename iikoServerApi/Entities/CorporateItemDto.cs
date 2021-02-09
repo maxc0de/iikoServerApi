@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace IikoServerApi
+namespace IikoApi
 {
     [Serializable]
     public class CorporateItemDto
